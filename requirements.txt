@@ -1,0 +1,13 @@
+numpy
+pandas
+matplotlib
+seaborn
+squarify
+scipy
+scikit-learn
+mlxtend
+statsmodels
+jupyter
+ipykernel
+pyspark
+torch
