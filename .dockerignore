@@ -1,0 +1,13 @@
+.venv
+.git
+.claude
+__pycache__
+*.pyc
+*.ipynb
+*.ipynb_checkpoints
+hadoop/
+.vscode
+.idea
+.mypy_cache
+.ruff_cache
+.pytest_cache

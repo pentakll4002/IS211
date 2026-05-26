@@ -64,3 +64,6 @@ data/
 # Data
 *.csv
 spark_output/
+
+metastore_db/
+run-pipelines.sh

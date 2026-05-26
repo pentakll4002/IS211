@@ -1,0 +1,12 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+typing-extensions==4.12.2
+numpy
+pandas
+matplotlib
+seaborn
+squarify
+scipy
+scikit-learn
+mlxtend
+statsmodels
+torch==2.4.1+cpu

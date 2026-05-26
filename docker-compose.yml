@@ -1,0 +1,95 @@
+# ============================================================
+# Spark Distributed Cluster - Docker Compose
+# Architecture: 1 Master + 2 Workers (simulates 2-machine setup)
+# ============================================================
+
+services:
+  # ──────────────────────────────────────────────
+  # Spark Master Node
+  # ──────────────────────────────────────────────
+  spark-master:
+    build: .
+    container_name: spark-master
+    hostname: spark-master
+    command: >
+      /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
+    ports:
+      - "8080:8080"   # Master Web UI
+      - "7077:7077"   # Master cluster port
+    environment:
+      - SPARK_MASTER_HOST=spark-master
+      - SPARK_MASTER_PORT=7077
+      - SPARK_MASTER_WEBUI_PORT=8080
+    volumes:
+      - ./:/app
+    networks:
+      - spark-network
+
+  # ──────────────────────────────────────────────
+  # Spark Worker Node 1 (simulates Machine 1)
+  # ──────────────────────────────────────────────
+  spark-worker-1:
+    build: .
+    container_name: spark-worker-1
+    hostname: spark-worker-1
+    command: >
+      /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker
+      spark://spark-master:7077
+    ports:
+      - "8081:8081"   # Worker 1 Web UI
+    environment:
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=2g
+      - SPARK_WORKER_WEBUI_PORT=8081
+    volumes:
+      - ./:/app
+    depends_on:
+      - spark-master
+    networks:
+      - spark-network
+
+  # ──────────────────────────────────────────────
+  # Spark Worker Node 2 (simulates Machine 2)
+  # ──────────────────────────────────────────────
+  spark-worker-2:
+    build: .
+    container_name: spark-worker-2
+    hostname: spark-worker-2
+    command: >
+      /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker
+      spark://spark-master:7077
+    ports:
+      - "8082:8081"   # Worker 2 Web UI (mapped to host 8082)
+    environment:
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=2g
+      - SPARK_WORKER_WEBUI_PORT=8081
+    volumes:
+      - ./:/app
+    depends_on:
+      - spark-master
+    networks:
+      - spark-network
+
+  # ──────────────────────────────────────────────
+  # Pipeline Runner (spark-submit)
+  # ──────────────────────────────────────────────
+  spark-submit:
+    build: .
+    container_name: spark-submit
+    hostname: spark-submit
+    command: bash /app/run-pipelines.sh
+    ports:
+      - "4040:4040"   # Spark Application UI
+    volumes:
+      - ./:/app
+    depends_on:
+      - spark-master
+      - spark-worker-1
+      - spark-worker-2
+    networks:
+      - spark-network
+
+networks:
+  spark-network:
+    driver: bridge

@@ -55,8 +55,14 @@ def main():
     print('=' * 60)
 
     print(f'\nSpark UI: {spark.sparkContext.uiWebUrl}')
-    input('Press Enter to stop Spark...')
+
+    # Only prompt in local/interactive mode (skip in Docker/automated runs)
+    mode = os.environ.get('SPARK_MODE', 'local').lower()
+    if mode == 'local':
+        input('Press Enter to stop Spark...')
+
     spark.stop()
 
 if __name__ == '__main__':
     main()
+

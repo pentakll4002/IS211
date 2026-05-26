@@ -17,4 +17,6 @@ def run(script):
 if __name__ == '__main__':
     run('pipeline_01_eda.py')
     run('pipeline_02_training.py')
+    run('pipeline_03_fragmentation.py')
     print('\nAll pipelines completed!')
+
