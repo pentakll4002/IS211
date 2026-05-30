@@ -10,3 +10,4 @@ scikit-learn
 mlxtend
 statsmodels
 torch==2.4.1+cpu
+flask

@@ -90,6 +90,77 @@ services:
     networks:
       - spark-network
 
+  # ──────────────────────────────────────────────
+  # Interactive PySpark Shell (for live SQL queries)
+  # Usage: docker compose run --rm pyspark-shell
+  # ──────────────────────────────────────────────
+  pyspark-shell:
+    build: .
+    container_name: pyspark-shell
+    hostname: pyspark-shell
+    stdin_open: true
+    tty: true
+    command: >
+      /opt/spark/bin/pyspark
+      --master spark://spark-master:7077
+      --driver-memory 2g
+      --executor-memory 2g
+      --executor-cores 2
+      --conf spark.sql.shuffle.partitions=4
+      --conf spark.default.parallelism=4
+      --conf spark.sql.adaptive.enabled=true
+      --conf spark.pyspark.python=/usr/bin/python3
+      --conf spark.pyspark.driver.python=/usr/bin/python3
+    ports:
+      - "4040:4040"   # Spark Application UI
+    environment:
+      - SPARK_MODE=docker
+      - PYTHONSTARTUP=/app/init_fragments.py
+    volumes:
+      - ./:/app
+    depends_on:
+      - spark-master
+      - spark-worker-1
+      - spark-worker-2
+    networks:
+      - spark-network
+
+  # ──────────────────────────────────────────────
+  # Web Query UI (Flask + Spark)
+  # Usage: docker compose up web-query-ui
+  # ──────────────────────────────────────────────
+  web-query-ui:
+    build: .
+    container_name: web-query-ui
+    hostname: web-query-ui
+    command: >
+      /opt/spark/bin/spark-submit
+      --master spark://spark-master:7077
+      --driver-memory 2g
+      --executor-memory 2g
+      --executor-cores 2
+      --conf spark.sql.shuffle.partitions=4
+      --conf spark.default.parallelism=4
+      --conf spark.sql.adaptive.enabled=true
+      --conf spark.ui.port=4041
+      --conf spark.pyspark.python=/usr/bin/python3
+      --conf spark.pyspark.driver.python=/usr/bin/python3
+      /app/web_query_ui.py
+    ports:
+      - "5000:5000"   # Flask Web UI
+      - "4041:4041"   # Spark Application UI
+    environment:
+      - SPARK_MODE=docker
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./:/app
+    depends_on:
+      - spark-master
+      - spark-worker-1
+      - spark-worker-2
+    networks:
+      - spark-network
+
 networks:
   spark-network:
     driver: bridge
